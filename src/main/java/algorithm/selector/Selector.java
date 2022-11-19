@@ -4,6 +4,12 @@ import algorithm.fitness.Fitness;
 import algorithm.model.Chromosome;
 import algorithm.model.Population;
 
+/**
+ * Class to choose a decent parent from a population
+ *
+ * @param <G> type of gene
+ * @param <S> type of solution
+ */
 public class Selector<G,S> implements Selection<G> {
 
     protected final Fitness<G,S> fitness;

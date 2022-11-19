@@ -12,5 +12,10 @@ public interface ChromosomeBuilder<G> {
         return list;
     }
 
+    /**
+     * Build a gene
+     *
+     * @return  <G> a gene
+     */
     G build();
 }

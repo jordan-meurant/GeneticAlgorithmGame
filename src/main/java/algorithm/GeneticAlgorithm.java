@@ -6,6 +6,10 @@ import algorithm.model.Chromosome;
 import algorithm.model.Population;
 import algorithm.selector.Selector;
 
+/**
+ * @param <G> type of one gene
+ * @param <S> type of the solution
+ */
 public class GeneticAlgorithm<G, S> {
     private final int maxIterations;
     private final int populationSize;
