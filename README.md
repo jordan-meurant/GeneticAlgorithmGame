@@ -98,6 +98,8 @@ double getFitnessScore(Chromosome<G> chromosome, S solution);
 default Chromosome<G> getFittest(Population<G> population, S solution) {...}
 default double getFittestScore(Population<G> population, S solution) {...}
 ````
+Afin de fonctionner correctement la méthode `getFitnessScore(...)` doit retourner au maximum un score de 1. Autrement dit, la fonction de fitness à implémenter est
+un problème de maximalisation.
 **Exemple pour les bitString :**
 ```java
  Fitness<Character, String> fitness = (chromosome, solution) -> {
