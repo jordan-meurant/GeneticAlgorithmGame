@@ -2,6 +2,7 @@ import algorithm.GeneticAlgorithm;
 import algorithm.builder.ChromosomeBuilder;
 import algorithm.builder.GeneticAlgorithmBuilder;
 import algorithm.fitness.Fitness;
+import algorithm.selector.TournamentSelector;
 import algorithm.selector.WheelSelector;
 import org.joml.Vector2i;
 import platformer.Direction;
@@ -153,6 +154,35 @@ public class Main {
             case "7" -> Direction.DOWN_LEFT;
             default -> Direction.DOWN;
         };
+    }
+
+
+    // Exemple d'application de l'algorithme génétique
+    public void bitString(){
+        ChromosomeBuilder<Character> chromosomeBuilder = () -> Math.random() < 0.5 ? '0' : '1';
+        Fitness<Character, String> fitness = (chromosome, solution) -> {
+            int score = 0;
+            for (int i = 0; i < chromosome.getNbGenes() && i < solution.length(); i++) {
+                if (chromosome.getGene(i) == solution.charAt(i)) {
+                    score++;
+                }
+            }
+            return (double) score/64;
+        };
+        String solution = "1011000100000100010000100000100111001000000100000100000000001111";
+        System.out.println("My solution : " + solution);
+
+
+        GeneticAlgorithm<Character, String> algorithm = new GeneticAlgorithmBuilder<Character, String>()
+                .populationSize(50)
+                .fitness(fitness)
+                .solution(solution)
+                .maxGeneSize(solution.length())
+                .chromosomesBuilder(chromosomeBuilder)
+                .maxIterations(10000)
+                .selector(new TournamentSelector<>(3, fitness, solution))
+                .buildGeneticAlgorithm();
+        algorithm.run();
     }
 
 }

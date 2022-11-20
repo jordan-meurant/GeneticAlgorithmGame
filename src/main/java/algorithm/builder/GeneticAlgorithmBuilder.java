@@ -7,7 +7,7 @@ import algorithm.selector.Selector;
 public class GeneticAlgorithmBuilder<G, S> {
     private int maxIterations = 100;
     private int maxGeneSize = 10;
-    private int minGeneSize = 1;
+    private int minGeneSize = 0;
 
 
     private int populationSize = 25;
