@@ -6,7 +6,10 @@ import algorithm.selector.WheelSelector;
 import org.joml.Vector2i;
 
 import java.util.ArrayList;
+import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Main {
     public static void main(String[] args) throws ExecutionException, InterruptedException {
@@ -23,7 +26,7 @@ public class Main {
             path = args[7];
         }
         Grid grid = new Grid(width, height, maxTicks);
-        grid.init("random");
+        grid.init(path);
 
 
         // Paramètres algorithme
@@ -32,13 +35,13 @@ public class Main {
             return determineMove(String.valueOf(random));
         };
 
-        /*Vector2i s = grid.getFlagDestination();
+        Vector2i s = grid.getFlagDestination();
         double initialDistance = grid.getDistanceBetweenCreatureAndFlag();
         Fitness<Direction, Vector2i> fitness = (chromosome, solution) -> {
             int moves = 1;
             double distanceScore = 0;
             double movesScore = 0;
-            double ticksScore = 1;
+            double ticksScore = 0;
 
             for (int i = 0; i < chromosome.getNbGenes(); i++) {
                 int distance = grid.getDistanceBetweenCreatureAndFlag();
@@ -46,14 +49,13 @@ public class Main {
                 distanceScore += 1 - ((initialDistance - Math.abs(initialDistance - distance)) / initialDistance);
                 movesScore += 1 - ((chromosome.getNbGenes() - Math.abs(chromosome.getNbGenes() - moves)) / chromosome.getNbGenes());
                 ticksScore += 1 - ((maxTicks - Math.abs(maxTicks - ticks)) / maxTicks);
-                if (grid.isMaxTicksReached()){
+                if (grid.isMaxTicksReached()) {
                     ticksScore = 0;
-                    break;
-                }else{
-                    if (grid.isAtDestination()){
+                } else {
+                    if (grid.isAtDestination()) {
                         distanceScore = chromosome.getNbGenes();
                         break;
-                    }else {
+                    } else {
                         grid.move(chromosome.getGene(i));
                         moves++;
                     }
@@ -76,14 +78,32 @@ public class Main {
                 .populationSize(50)
                 .chromosomesBuilder(directions)
                 .maxIterations(5000)
-                .selector(new WheelSelector<>(nbThreads,fitness, s))
-                .buildGeneticAlgorithm();*/
+                .selector(new WheelSelector<>(nbThreads, fitness, s))
+                .buildGeneticAlgorithm();
 
-        //algorithm.run();
+        Scanner console = new Scanner(System.in);
+        String choice = "";
+        ExecutorService service = Executors.newFixedThreadPool(nbThreads);
+        while (true) {
+            System.out.print("Enter a command : ");
+            String value = console.nextLine();
+            value = value.toLowerCase();
+            if (value.equals("n")) {
+                algorithm.run();
+            } else if (value.equals("s")) {
+                System.out.println(algorithm.getGenesSolution());
+                grid.reset();
+                moves(algorithm.getGenesSolution(),grid);
 
-
-        //moves(algorithm.getGenesSolution(),grid);
-
+            }else if (value.length() > 1) {
+                String[] array = value.split(" ");
+                int n = Integer.parseInt(array[1]);
+                System.out.println("n =" + n);
+                for (int i = 0; i < n; i++) {
+                    algorithm.run();
+                }
+            }
+        }
     }
 
     private static void movesWithStrings(String moves, Grid grid) {
@@ -100,11 +120,13 @@ public class Main {
     }
 
     private static void moves(ArrayList<Direction> directions, Grid grid) {
-        grid.reset();
         grid.setShowGrid(true);
+        System.out.println("Grille de départ");
+        System.out.println(grid);
         for (Direction d : directions) {
             System.out.println("Move : " + d);
             if (grid.isMaxTicksReached()) {
+                System.out.println(grid.getTicksCreature());
                 System.out.println("Nombre de ticks maximum atteint");
                 return;
             } else {
@@ -132,6 +154,3 @@ public class Main {
     }
 
 }
-
-// 10 4 5 env.txt 231235
-// w h env.txt maxtick moves

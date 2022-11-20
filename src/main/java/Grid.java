@@ -28,7 +28,6 @@ public class Grid {
         this.height = height;
         this.maxTicks = maxTicks;
         this.tiles = new Tile[height][width];
-        //addTiles(readAllData("/Users/jordanmeurant/IdeaProjects/GeneticAlgorithmGame/src/main/java/grid.csv"));
     }
 
     public void setShowGrid(boolean showGrid) {
@@ -100,7 +99,6 @@ public class Grid {
 
         Tile dstTile = tiles[dst.y][dst.x];
 
-
         if (!checkCollision(dst)) {
             if (checkVoid(dst)) {
                 setCreaturePosition(dst, creature.getPosition());
@@ -116,19 +114,10 @@ public class Grid {
                 if (voidUnderCreature()) {
                     creature.decrementTick();
                     move(Direction.DOWN);
-                } /*else if (voidNextToCreature(direction)) {
-                    switch (direction) {
-                        case UP_RIGHT -> {
-                            move(Direction.RIGHT);
-                        }
-                        case UP_LEFT-> move(Direction.LEFT);
-                    }
-                }*/ else {
-                    //System.out.println("2e FINI");
+                } else {
                     if (showGrid) System.out.println(printGrid());
                 }
             } else {
-                //System.out.println("3e FINI");
                 switch (direction) {
                     case UP_RIGHT -> move(Direction.RIGHT);
                     case UP_LEFT -> move(Direction.LEFT);
@@ -151,8 +140,6 @@ public class Grid {
         } else {
             return !(tiles[dst.y + 1][dst.x] instanceof Obstacle || tiles[dst.y][dst.x] instanceof Border);
         }
-        //boolean x = !(tiles[dst.y + 1][dst.x] instanceof Obstacle);
-        //System.out.println("Vide : " + x);
     }
 
     private boolean checkCollision(Vector2i dst) {
@@ -182,20 +169,16 @@ public class Grid {
     }
 
     public void reset() {
-        /*creature.setPosition(this.initialCreaturePosition);
-        this.tiles[creature.getPosition().y][creature.getPosition().x] = new Tile(new Vector2i(
-                creature.getPosition().x,
-                creature.getPosition().y), Colors.WHITE_BACKGROUND);
-        this.tiles[this.initialCreaturePosition.y][initialCreaturePosition.x] = creature;*/
 
+        if(!creature.getPosition().equals(this.initialCreaturePosition)){
+            setCreaturePosition(this.initialCreaturePosition, creature.getPosition());
+            this.tiles[this.initialFlagPosition.x][this.initialFlagPosition.y] = new Flag(this.initialFlagPosition,
+                                                                                          Colors.BLACK);
+        }
 
-        setCreaturePosition(this.initialCreaturePosition, creature.getPosition());
-        this.tiles[this.initialFlagPosition.x][this.initialFlagPosition.y] = new Flag(this.initialFlagPosition,
-                                                                                      Colors.BLACK);
         this.creature.resetTick();
         this.maxTicksReached = false;
-        this.atDestination = false;
-        //System.out.println(printGrid());
+        this.atDestination = false;;
     }
 
     private String printGrid() {
@@ -246,7 +229,6 @@ public class Grid {
                 }
             }
         }
-        System.out.println(printGrid());
         addFlag();
         addCreature();
     }

@@ -13,7 +13,7 @@ import java.util.concurrent.ExecutionException;
  * @param <G> type of one gene
  * @param <S> type of the solution
  */
-public class GeneticAlgorithm<G, S> {
+public class GeneticAlgorithm<G, S>{
     private final int maxIterations;
     private final int populationSize;
     private final double crossoverRate;
@@ -51,7 +51,7 @@ public class GeneticAlgorithm<G, S> {
         this.selector = selector;
     }
 
-    public void run() throws ExecutionException, InterruptedException {
+    public void run() {
         population.init(this.populationSize,
                         this.minGeneSize,
                         this.maxGeneSize,
@@ -64,15 +64,19 @@ public class GeneticAlgorithm<G, S> {
 
             Chromosome<G> fittest = fitness.getFittest(population, solution);
             System.out.println("Iter_" + iterationCount + "\t"+ "NbGenes: "+fittest.getNbGenes()  + " Score: " + fitness.getFittestScore(population, solution)+ " GenesFittest" + fittest.getGenes());
-            this.population = evolvePopulation(this.population);
+            try {
+                this.population = evolvePopulation(this.population);
+            } catch (ExecutionException | InterruptedException e) {
+                throw new RuntimeException(e);
+            }
             iterationCount++;
         }
-        System.out.println("Solution found!");
-        System.out.println("iter_" + iterationCount);
-        System.out.println("Genes of fittest chromosome : " + fitness
+         System.out.println("Solution found!");
+         System.out.println("iter_" + iterationCount);
+         System.out.println("Genes of fittest chromosome : " + fitness
                 .getFittest(population, solution)
                 .getGenes());
-        System.out.println("solution : " + solution);
+         System.out.println("solution : " + solution);
 
     }
 
