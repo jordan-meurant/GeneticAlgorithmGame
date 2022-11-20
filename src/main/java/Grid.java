@@ -229,22 +229,55 @@ public class Grid {
         for (int x = 0; x < this.height; x++) {
             for (int y = 0; y < this.width; y++) {
                 if (x == 0 || y == 0 || x == this.height - 1 || y == this.width - 1) {
-                    this.tiles[x][y] = getRandomBorderTile(x, y);
+                    this.tiles[x][y] = new Obstacle(new Vector2i(x, y), Colors.BLACK);
+                } else if (x == 1) {
+                    this.tiles[x][y] = new Tile(new Vector2i(x, y), Colors.BLACK);
+                } else if (x < this.height / 2) {
+                    this.tiles[x][y] = getRandomMiddleTile(x, y, 0.1);
+                } else {
+                    Tile tile = getRandomMiddleTile(x, y, 0.3);
+                    if (x > 2 && this.tiles[x - 1][y] instanceof Obstacle) {
+                        this.tiles[x][y] = new Obstacle(new Vector2i(x, y), Colors.BLACK);
+                    } else {
+                        if (this.tiles[x][y] == null) {
+                            this.tiles[x][y] = tile;
+                        }
+                    }
                 }
-                int type = 0;
-                this.tiles[x][y] = getTypeTile(x, y, type);
             }
         }
-
-
-        // random creature pos
-        // random destination
-
+        System.out.println(printGrid());
+        addFlag();
+        addCreature();
     }
 
-    private Tile getRandomMiddleTile(int x, int y) {
-        // pas oublier de remplir les cases si y'a du vide
-        return Math.random() < 0.5
+    private void addCreature() {
+        for (int y = 0; y < this.width; y++) {
+            for (int x = this.height - 1; x >= 1; x--) {
+                if (!(this.tiles[x][y] instanceof Obstacle)) {
+                    this.initialCreaturePosition = new Vector2i(x, y);
+                    this.creature = new Creature(new Vector2i(x, y), Colors.YELLOW);
+                    this.tiles[x][y] = creature;
+                    return;
+                }
+            }
+        }
+    }
+
+    private void addFlag() {
+        for (int y = this.width - 1; y >= 1; y--) {
+            for (int x = this.height - 1; x >= 1; x--) {
+                if (!(this.tiles[x][y] instanceof Obstacle)) {
+                    this.initialFlagPosition = new Vector2i(x, y);
+                    this.tiles[x][y] = new Flag(new Vector2i(x, y), Colors.BLACK);
+                    return;
+                }
+            }
+        }
+    }
+
+    private Tile getRandomMiddleTile(int x, int y, double p) {
+        return Math.random() < p
                ? new Obstacle(new Vector2i(x, y), Colors.BLACK)
                : new Tile(new Vector2i(x, y), Colors.WHITE_BACKGROUND);
     }
@@ -263,11 +296,11 @@ public class Grid {
         return this.initialFlagPosition;
     }
 
-    public int getTicksCreature(){
+    public int getTicksCreature() {
         return this.creature.getTick();
     }
 
-    public int getDistanceBetweenCreatureAndFlag(){
-       return Math.abs(creature.getPosition().x - this.initialFlagPosition.x) + Math.abs(creature.getPosition().y - this.initialFlagPosition.y);
+    public int getDistanceBetweenCreatureAndFlag() {
+        return Math.abs(creature.getPosition().x - this.initialFlagPosition.x) + Math.abs(creature.getPosition().y - this.initialFlagPosition.y);
     }
 }

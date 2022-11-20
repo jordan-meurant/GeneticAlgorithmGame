@@ -23,7 +23,7 @@ public class Main {
             path = args[7];
         }
         Grid grid = new Grid(width, height, maxTicks);
-        grid.init(path);
+        grid.init("random");
 
 
         // Paramètres algorithme
@@ -32,7 +32,7 @@ public class Main {
             return determineMove(String.valueOf(random));
         };
 
-        Vector2i s = grid.getFlagDestination();
+        /*Vector2i s = grid.getFlagDestination();
         double initialDistance = grid.getDistanceBetweenCreatureAndFlag();
         Fitness<Direction, Vector2i> fitness = (chromosome, solution) -> {
             int moves = 1;
@@ -77,12 +77,12 @@ public class Main {
                 .chromosomesBuilder(directions)
                 .maxIterations(5000)
                 .selector(new WheelSelector<>(nbThreads,fitness, s))
-                .buildGeneticAlgorithm();
+                .buildGeneticAlgorithm();*/
 
-        algorithm.run();
+        //algorithm.run();
 
 
-        moves(algorithm.getGenesSolution(),grid);
+        //moves(algorithm.getGenesSolution(),grid);
 
     }
 
