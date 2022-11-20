@@ -15,8 +15,9 @@ public class Chromosome<G> {
         this.genes = genes;
     }
 
-    public void init(int geneSize, ChromosomeBuilder<G> chromosomeBuilder) {
-        this.genes = chromosomeBuilder.buildList(geneSize);
+    public void init(int minGeneSize,int maxGeneSize, ChromosomeBuilder<G> chromosomeBuilder) {
+        this.genes.clear();
+        this.genes = chromosomeBuilder.buildList(minGeneSize,maxGeneSize);
     }
 
     public void setGenes(int index, G gene) {

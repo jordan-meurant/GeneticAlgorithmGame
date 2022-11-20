@@ -6,7 +6,9 @@ import algorithm.selector.Selector;
 
 public class GeneticAlgorithmBuilder<G, S> {
     private int maxIterations = 100;
-    private int geneSize = 1;
+    private int maxGeneSize = 1;
+    private int minGeneSize = 0;
+
 
     private int populationSize = 25;
     private double crossoverRate = 0.9;
@@ -37,7 +39,8 @@ public class GeneticAlgorithmBuilder<G, S> {
         }
 
         return new GeneticAlgorithm<G, S>(maxIterations,
-                                          geneSize,
+                                          maxGeneSize,
+                                          minGeneSize,
                                           populationSize,
                                           crossoverRate,
                                           mutationRate,
@@ -57,8 +60,11 @@ public class GeneticAlgorithmBuilder<G, S> {
         return this;
     }
 
-    public GeneticAlgorithmBuilder<G, S> geneSize(int geneSize) {
-        this.geneSize = geneSize;
+    public GeneticAlgorithmBuilder<G, S> maxGeneSize(int geneSize) {
+        this.maxGeneSize = geneSize;
+        return this;
+    }public GeneticAlgorithmBuilder<G, S> minGeneSize(int geneSize) {
+        this.minGeneSize = geneSize;
         return this;
     }
 

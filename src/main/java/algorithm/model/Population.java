@@ -12,10 +12,11 @@ public class Population<G> {
         chromosomes = new ArrayList<Chromosome<G>>();
     }
 
-    public void init(int populationSize, int geneSize, ChromosomeBuilder<G> chromosomeBuilder){
+    public void init(int populationSize, int minGeneSize,int maxGeneSize, ChromosomeBuilder<G> chromosomeBuilder){
+        this.chromosomes.clear();
         for (int i =0; i < populationSize; i++){
                 Chromosome<G> chromosome = new Chromosome<>();
-                chromosome.init(geneSize, chromosomeBuilder);
+                chromosome.init(minGeneSize,maxGeneSize, chromosomeBuilder);
                 this.chromosomes.add(chromosome);
         }
     }

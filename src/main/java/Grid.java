@@ -18,12 +18,21 @@ public class Grid {
     private boolean atDestination = false;
     private boolean maxTicksReached = false;
 
+    private Vector2i initialCreaturePosition;
+    private Vector2i initialFlagPosition;
+
+    private boolean showGrid = false;
+
     public Grid(int width, int height, int maxTicks) {
         this.width = width;
         this.height = height;
         this.maxTicks = maxTicks;
         this.tiles = new Tile[height][width];
         //addTiles(readAllData("/Users/jordanmeurant/IdeaProjects/GeneticAlgorithmGame/src/main/java/grid.csv"));
+    }
+
+    public void setShowGrid(boolean showGrid) {
+        this.showGrid = showGrid;
     }
 
     public boolean isAtDestination() {
@@ -46,17 +55,21 @@ public class Grid {
         return allData;
     }
 
-    private Tile addTile(int x, int y, int state) {
+    private Tile getTypeTile(int x, int y, int state) {
         Tile newTile;
         switch (state) {
             //case 0 -> newTile = new Tile(new Vector2i(x, y), Colors.WHITE_BACKGROUND);
             case 1 -> newTile = new Obstacle(new Vector2i(x, y), Colors.BLACK);
             case 2 -> {
+                this.initialCreaturePosition = new Vector2i(x, y);
                 this.creature = new Creature(new Vector2i(x, y), Colors.YELLOW);
                 newTile = creature;
             }
             case 3 -> newTile = new Border(new Vector2i(x, y), Colors.BLACK);
-            case 4 -> newTile = new Flag(new Vector2i(x, y), Colors.BLACK);
+            case 4 -> {
+                this.initialFlagPosition = new Vector2i(x, y);
+                newTile = new Flag(new Vector2i(x, y), Colors.BLACK);
+            }
 
             default -> newTile = new Tile(new Vector2i(x, y), Colors.WHITE_BACKGROUND);
         }
@@ -66,7 +79,7 @@ public class Grid {
     private void addTiles(List<String[]> data) {
         for (int x = 0; x < data.size(); x++) {
             for (int y = 0; y < data.get(x).length; y++) {
-                this.tiles[x][y] = addTile(x, y, Integer.parseInt(data.get(x)[y]));
+                this.tiles[x][y] = getTypeTile(x, y, Integer.parseInt(data.get(x)[y]));
             }
         }
     }
@@ -77,7 +90,6 @@ public class Grid {
 
     public void move(Direction direction) {
         creature.incrementTick();
-        System.out.println("nb ticks : " + creature.getTick());
         if ((creature.getTick()) > this.maxTicks) {
             this.maxTicksReached = true;
             return;
@@ -111,13 +123,12 @@ public class Grid {
                         }
                         case UP_LEFT-> move(Direction.LEFT);
                     }
-                    System.out.println(printGrid());
                 }*/ else {
-                    System.out.println("2e FINI");
-                    System.out.println(printGrid());
+                    //System.out.println("2e FINI");
+                    if (showGrid) System.out.println(printGrid());
                 }
             } else {
-                System.out.println("3e FINI");
+                //System.out.println("3e FINI");
                 switch (direction) {
                     case UP_RIGHT -> move(Direction.RIGHT);
                     case UP_LEFT -> move(Direction.LEFT);
@@ -160,13 +171,31 @@ public class Grid {
         }
     }
 
-    public void setCreaturePosition(Vector2i newPosition, Vector2i oldPosition) {
+    private void setCreaturePosition(Vector2i newPosition, Vector2i oldPosition) {
         creature.setPosition(newPosition);
         this.tiles[newPosition.y][newPosition.x] = creature;
         this.tiles[oldPosition.y][oldPosition.x] = new Tile(new Vector2i(oldPosition.x,
                                                                          oldPosition.y),
                                                             Colors.WHITE_BACKGROUND);
-        System.out.println(printGrid());
+
+        if (showGrid) System.out.println(printGrid());
+    }
+
+    public void reset() {
+        /*creature.setPosition(this.initialCreaturePosition);
+        this.tiles[creature.getPosition().y][creature.getPosition().x] = new Tile(new Vector2i(
+                creature.getPosition().x,
+                creature.getPosition().y), Colors.WHITE_BACKGROUND);
+        this.tiles[this.initialCreaturePosition.y][initialCreaturePosition.x] = creature;*/
+
+
+        setCreaturePosition(this.initialCreaturePosition, creature.getPosition());
+        this.tiles[this.initialFlagPosition.x][this.initialFlagPosition.y] = new Flag(this.initialFlagPosition,
+                                                                                      Colors.BLACK);
+        this.creature.resetTick();
+        this.maxTicksReached = false;
+        this.atDestination = false;
+        //System.out.println(printGrid());
     }
 
     private String printGrid() {
@@ -197,5 +226,48 @@ public class Grid {
     }
 
     private void addRandomTiles() {
+        for (int x = 0; x < this.height; x++) {
+            for (int y = 0; y < this.width; y++) {
+                if (x == 0 || y == 0 || x == this.height - 1 || y == this.width - 1) {
+                    this.tiles[x][y] = getRandomBorderTile(x, y);
+                }
+                int type = 0;
+                this.tiles[x][y] = getTypeTile(x, y, type);
+            }
+        }
+
+
+        // random creature pos
+        // random destination
+
+    }
+
+    private Tile getRandomMiddleTile(int x, int y) {
+        // pas oublier de remplir les cases si y'a du vide
+        return Math.random() < 0.5
+               ? new Obstacle(new Vector2i(x, y), Colors.BLACK)
+               : new Tile(new Vector2i(x, y), Colors.WHITE_BACKGROUND);
+    }
+
+    private Tile getRandomBorderTile(int x, int y) {
+        return Math.random() < 0.5
+               ? new Border(new Vector2i(x, y), Colors.BLACK)
+               : new Obstacle(new Vector2i(x, y), Colors.BLACK);
+    }
+
+    public Vector2i getCreaturePosition() {
+        return creature.getPosition();
+    }
+
+    public Vector2i getFlagDestination() {
+        return this.initialFlagPosition;
+    }
+
+    public int getTicksCreature(){
+        return this.creature.getTick();
+    }
+
+    public int getDistanceBetweenCreatureAndFlag(){
+       return Math.abs(creature.getPosition().x - this.initialFlagPosition.x) + Math.abs(creature.getPosition().y - this.initialFlagPosition.y);
     }
 }

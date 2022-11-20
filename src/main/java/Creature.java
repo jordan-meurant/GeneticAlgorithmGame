@@ -27,4 +27,8 @@ public class Creature extends Tile {
     }public void decrementTick(){
         this.tick--;
     }
+
+    public void resetTick(){
+        this.tick = 0;
+    }
 }

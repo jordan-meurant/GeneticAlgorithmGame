@@ -2,10 +2,14 @@ import algorithm.GeneticAlgorithm;
 import algorithm.builder.ChromosomeBuilder;
 import algorithm.builder.GeneticAlgorithmBuilder;
 import algorithm.fitness.Fitness;
-import algorithm.selector.TournamentSelector;
+import algorithm.selector.WheelSelector;
+import org.joml.Vector2i;
+
+import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
 
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
 
         int nbThreads = Integer.parseInt(args[0]);
         int width = Integer.parseInt(args[1]);
@@ -14,70 +18,103 @@ public class Main {
         double crossRate = Double.parseDouble(args[4]);
         double mutationRate = Double.parseDouble(args[5]);
         int maxTicks = Integer.parseInt(args[6]);
-        String path="random";
-        if (args.length == 8){
+        String path = "random";
+        if (args.length == 8) {
             path = args[7];
         }
-        String moves = "1233322223332333";
-
-
-
-
-        Grid grid = new Grid(width, height,maxTicks);
+        Grid grid = new Grid(width, height, maxTicks);
         grid.init(path);
-        // moves
-        moves(moves,grid);
 
 
-        ChromosomeBuilder<Character> chromosomeBuilder = () -> Math.random() < 0.5 ? '0' : '1';
-        Fitness<Character, String> fitness = (chromosome, solution) -> {
-            int score = 0;
-            for (int i = 0; i < chromosome.getNbGenes() && i < solution.length(); i++) {
-                if (chromosome.getGene(i) == solution.charAt(i)) {
-                    score++;
+        // Paramètres algorithme
+        ChromosomeBuilder<Direction> directions = () -> {
+            int random = (int) (Math.random() * 8);
+            return determineMove(String.valueOf(random));
+        };
+
+        Vector2i s = grid.getFlagDestination();
+        double initialDistance = grid.getDistanceBetweenCreatureAndFlag();
+        Fitness<Direction, Vector2i> fitness = (chromosome, solution) -> {
+            int moves = 1;
+            double distanceScore = 0;
+            double movesScore = 0;
+            double ticksScore = 1;
+
+            for (int i = 0; i < chromosome.getNbGenes(); i++) {
+                int distance = grid.getDistanceBetweenCreatureAndFlag();
+                int ticks = grid.getTicksCreature();
+                distanceScore += 1 - ((initialDistance - Math.abs(initialDistance - distance)) / initialDistance);
+                movesScore += 1 - ((chromosome.getNbGenes() - Math.abs(chromosome.getNbGenes() - moves)) / chromosome.getNbGenes());
+                ticksScore += 1 - ((maxTicks - Math.abs(maxTicks - ticks)) / maxTicks);
+                if (grid.isMaxTicksReached()){
+                    ticksScore = 0;
+                    break;
+                }else{
+                    if (grid.isAtDestination()){
+                        distanceScore = chromosome.getNbGenes();
+                        break;
+                    }else {
+                        grid.move(chromosome.getGene(i));
+                        moves++;
+                    }
                 }
             }
-            int a = chromosome.getNbGenes();
-            return (double) score/chromosome.getNbGenes();
+
+            distanceScore /= chromosome.getNbGenes();
+            movesScore /= chromosome.getNbGenes();
+            ticksScore /= chromosome.getNbGenes();
+
+            grid.reset();
+            return (distanceScore + movesScore + ticksScore) / 3;
         };
-        String solution = "1011000100000100010000100000100111001000000100000100000000001111";
-        System.out.println("My solution : " + solution);
 
-
-        GeneticAlgorithm<Character, String> algorithm = new GeneticAlgorithmBuilder<Character, String>()
-                .populationSize(50)
-                .crossoverRate(0.3)
-                .mutationRate(0.1)
+        GeneticAlgorithm<Direction, Vector2i> algorithm = new GeneticAlgorithmBuilder<Direction, Vector2i>()
                 .fitness(fitness)
-                .solution(solution)
-                .geneSize(solution.length())
-                .chromosomesBuilder(chromosomeBuilder)
-                .maxIterations(3000)
-                .selector(new TournamentSelector<>(3, fitness, solution))
+                .solution(s)
+                .maxGeneSize(15)
+                .minGeneSize(10)
+                .populationSize(50)
+                .chromosomesBuilder(directions)
+                .maxIterations(5000)
+                .selector(new WheelSelector<>(nbThreads,fitness, s))
                 .buildGeneticAlgorithm();
-       // algorithm.run();
+
+        algorithm.run();
+
+
+        moves(algorithm.getGenesSolution(),grid);
+
     }
 
-    private static void moves(String moves, Grid grid) {
+    private static void movesWithStrings(String moves, Grid grid) {
         String[] movesArray = moves.split("");
-        System.out.println("Moves : " + String.join("->",movesArray));
+        System.out.println("Moves : " + String.join("->", movesArray));
+        grid.reset();
+        grid.setShowGrid(true);
+        ArrayList<Direction> directions = new ArrayList<>();
         for (String move : movesArray) {
-            Direction direction  = determineMove(move);
-            System.out.println("Move : " + direction.toString() );
-            if (grid.isMaxTicksReached()){
+            Direction direction = determineMove(move);
+            directions.add(direction);
+        }
+        moves(directions, grid);
+    }
+
+    private static void moves(ArrayList<Direction> directions, Grid grid) {
+        grid.reset();
+        grid.setShowGrid(true);
+        for (Direction d : directions) {
+            System.out.println("Move : " + d);
+            if (grid.isMaxTicksReached()) {
                 System.out.println("Nombre de ticks maximum atteint");
                 return;
-            }else {
-                if(grid.isAtDestination()){
+            } else {
+                if (grid.isAtDestination()) {
                     System.out.println("La créature est arrivé à destination");
                     return;
-                }else{
-                    grid.move(direction);
+                } else {
+                    grid.move(d);
                 }
             }
-
-
-
         }
     }
 

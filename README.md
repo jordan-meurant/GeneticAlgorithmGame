@@ -63,9 +63,10 @@ GeneticAlgorithm<Character, String> algorithm = new GeneticAlgorithmBuilder<Char
 ```
 _Note : les 5 premiers paramètres ne sont pas nécessaires puisqu'ils possèdent chacun une valeur par défaut_
 #### Fitness
-Une interface `Fitness` permet de définir la manière de calculer la fitness d'un chromosome en implémentant 
-la méthode `getFitnessScore(Chromosome<G> chromosome, S solution)` ou (avec Java 8) en utilisant une 
-expression lambda. L'interface définit également 2 méthodes définies par défaut : 
+Une interface `Fitness` permet de définir la manière de calculer la **fitness** d'un chromosome en implémentant 
+la méthode `getFitnessScore(Chromosome<G> chromosome, S solution)` ou (avec Java 8 et +) en utilisant une 
+expression lambda. Attention, le calcul de la fitness repose sur la maximalisation. Ainsi, un chromosome avec le score le plus
+élevé sera le plus fittest. L'interface définit également 2 méthodes définies par défaut : 
 ````java
 double getFitnessScore(Chromosome<G> chromosome, S solution);
 default Chromosome<G> getFittest(Population<G> population, S solution) {...}
@@ -108,3 +109,24 @@ public interface ChromosomeBuilder<G> {
 ```java
 ChromosomeBuilder<Character> chromosomeBuilder = () -> Math.random() < 0.5 ? '0' : '1';
 ```
+### Platformer
+#### Dépendances
+Deux dépendances ont été utilisées : 
+- [Opencsv](https://opencsv.sourceforge.net) est une librairie qui permet de travailler facilement avec les fichiers CSV.
+- [joml](https://github.com/JOML-CI/JOML) une librairie mathématique Java pour les calculs de rendu OpenGL. Celle-ci met à disposition des vecteurs, ce qui permet de définir la position de chaque case du jeu.
+
+Vous retrouverez dans le fichier `pom.xml` les dépendances :
+````xml
+<dependencies>
+        <dependency>
+            <groupId>com.opencsv</groupId>
+            <artifactId>opencsv</artifactId>
+            <version>4.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.joml</groupId>
+            <artifactId>joml</artifactId>
+            <version>1.10.4</version>
+        </dependency>
+    </dependencies>
+````

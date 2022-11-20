@@ -6,6 +6,9 @@ import algorithm.model.Chromosome;
 import algorithm.model.Population;
 import algorithm.selector.Selector;
 
+import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
+
 /**
  * @param <G> type of one gene
  * @param <S> type of the solution
@@ -19,23 +22,26 @@ public class GeneticAlgorithm<G, S> {
     private final ChromosomeBuilder<G> chromosomeBuilder;
     private final Fitness<G, S> fitness;
     private final S solution;
-    private final int geneSize;
+    private final int maxGeneSize;
+    private final int minGeneSize;
+    private final Selector<G, S> selector;
     //private final ArrayList<algorithm.model.Chromosome<G>> chromosomes;
     private Population<G> population = new Population<>();
-    private final Selector<G,S> selector;
 
 
     public GeneticAlgorithm(int maxIterations,
-                            int geneSize,
+                            int maxGeneSize,
+                            int minGeneSize,
                             int populationSize,
                             double crossoverRate,
                             double mutationRate,
                             ChromosomeBuilder<G> chromosomeBuilder,
                             Fitness<G, S> fitness,
-                            Selector<G,S> selector,
+                            Selector<G, S> selector,
                             S solution) {
         this.maxIterations = maxIterations;
-        this.geneSize = geneSize;
+        this.minGeneSize = minGeneSize;
+        this.maxGeneSize = maxGeneSize;
         this.populationSize = populationSize;
         this.crossoverRate = crossoverRate;
         this.mutationRate = mutationRate;
@@ -45,25 +51,32 @@ public class GeneticAlgorithm<G, S> {
         this.selector = selector;
     }
 
-    public void run() {
-        population.init(this.populationSize, this.geneSize, this.chromosomeBuilder);
-        int generationCount = 1;
-        while (generationCount < maxIterations && Double.compare(fitness.getFittestScore(population,solution), 1)!=0) {
-            System.out.println("Generation_" + generationCount + " " + fitness.getFittest(population,
-                                                                                          solution) + " Score: " + fitness.getFittestScore(
-                    population,
-                    solution));
+    public void run() throws ExecutionException, InterruptedException {
+        population.init(this.populationSize,
+                        this.minGeneSize,
+                        this.maxGeneSize,
+                        this.chromosomeBuilder);
+        selector.computeAllFitness(this.population);
+        int iterationCount = 1;
+        while (iterationCount < maxIterations && Double.compare(fitness.getFittestScore(population,
+                                                                                        solution),
+                                                                1) != 0) {
+
+            Chromosome<G> fittest = fitness.getFittest(population, solution);
+            System.out.println("Iter_" + iterationCount + "\t"+ "NbGenes: "+fittest.getNbGenes()  + " Score: " + fitness.getFittestScore(population, solution)+ " GenesFittest" + fittest.getGenes());
             this.population = evolvePopulation(this.population);
-            generationCount++;
+            iterationCount++;
         }
         System.out.println("Solution found!");
-        System.out.println("Generation_" + generationCount);
-        System.out.println("algorithm.model.Chromosome : " + fitness.getFittest(population, solution));
+        System.out.println("iter_" + iterationCount);
+        System.out.println("Genes of fittest chromosome : " + fitness
+                .getFittest(population, solution)
+                .getGenes());
         System.out.println("solution : " + solution);
 
     }
 
-    private Population<G> evolvePopulation(Population<G> pop) {
+    private Population<G> evolvePopulation(Population<G> pop) throws ExecutionException, InterruptedException {
         Population<G> newPopulation = new Population<>();
 
         newPopulation.addChromosome(fitness.getFittest(pop, solution));
@@ -83,13 +96,9 @@ public class GeneticAlgorithm<G, S> {
     }
 
 
-
-
-
     private Chromosome<G> crossover(Chromosome<G> parent1, Chromosome<G> parent2) {
         Chromosome<G> child = new Chromosome<>();
-        // TODO NbGenes
-        for (int i = 0; i < parent1.getNbGenes(); i++) {
+        for (int i = 0; i < parent1.getNbGenes() && i < parent2.getNbGenes(); i++) {
             child.addGene(Math.random() <= this.crossoverRate
                           ? parent1.getGene(i)
                           : parent2.getGene(i));
@@ -109,5 +118,10 @@ public class GeneticAlgorithm<G, S> {
     @Override
     public String toString() {
         return "algorithm.GeneticAlgorithm{" + "populationSize=" + populationSize + ", crossoverRate=" + crossoverRate + ", mutationRate=" + mutationRate + '}';
+    }
+
+    public ArrayList<G> getGenesSolution() {
+        Chromosome<G> fittest = fitness.getFittest(population, solution);
+        return fittest.getGenes();
     }
 }
