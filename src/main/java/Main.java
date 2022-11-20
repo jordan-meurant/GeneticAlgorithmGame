@@ -4,6 +4,8 @@ import algorithm.builder.GeneticAlgorithmBuilder;
 import algorithm.fitness.Fitness;
 import algorithm.selector.WheelSelector;
 import org.joml.Vector2i;
+import platformer.Direction;
+import platformer.Grid;
 
 import java.util.ArrayList;
 import java.util.Scanner;

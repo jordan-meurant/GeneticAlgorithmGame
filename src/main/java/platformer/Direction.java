@@ -1,3 +1,5 @@
+package platformer;
+
 import org.joml.Vector2i;
 
 public enum Direction {

@@ -1,8 +1,11 @@
+package platformer;
+
 import com.opencsv.CSVParser;
 import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import org.joml.Vector2i;
+import platformer.tiles.*;
 import utils.Colors;
 
 import java.io.FileReader;
@@ -57,7 +60,6 @@ public class Grid {
     private Tile getTypeTile(int x, int y, int state) {
         Tile newTile;
         switch (state) {
-            //case 0 -> newTile = new Tile(new Vector2i(x, y), Colors.WHITE_BACKGROUND);
             case 1 -> newTile = new Obstacle(new Vector2i(x, y), Colors.BLACK);
             case 2 -> {
                 this.initialCreaturePosition = new Vector2i(x, y);
@@ -127,11 +129,11 @@ public class Grid {
     }
 
     private boolean voidNextToCreature(Direction direction) {
-        return !(tiles[creature.position.y][creature.position.x + direction.getDirection().x] instanceof Obstacle || tiles[creature.position.y][creature.position.x + direction.getDirection().x] instanceof Border);
+        return !(tiles[creature.getPosition().y][creature.getPosition().x + direction.getDirection().x] instanceof Obstacle || tiles[creature.getPosition().y][creature.getPosition().x + direction.getDirection().x] instanceof Border);
     }
 
     private boolean voidUnderCreature() {
-        return !(tiles[creature.position.y + 1][creature.position.x] instanceof Obstacle || tiles[creature.position.y + 1][creature.position.x] instanceof Border);
+        return !(tiles[creature.getPosition().y + 1][creature.getPosition().x] instanceof Obstacle || tiles[creature.getPosition().y + 1][creature.getPosition().x] instanceof Border);
     }
 
     private boolean checkVoid(Vector2i dst) {
@@ -149,7 +151,6 @@ public class Grid {
     private void addGravity(Vector2i dst, Direction direction) {
         switch (direction) {
             case RIGHT, UP_RIGHT, DOWN_RIGHT -> {
-                //System.out.println("passé dans le SWITCH");
                 move(Direction.DOWN_RIGHT);
             }
             case UP_LEFT, LEFT, DOWN_LEFT -> move(Direction.DOWN_LEFT);

@@ -1,3 +1,5 @@
+package platformer.tiles;
+
 import org.joml.Vector2i;
 import utils.Colors;
 
