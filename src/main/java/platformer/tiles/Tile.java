@@ -15,10 +15,6 @@ public class Tile {
         return position;
     }
 
-    //@Override
-    //public String toString() {
-    //  return color+ "\t"+ Colors.RESET_COLORS;
-    //}
 
     @Override
     public String toString() {

@@ -32,6 +32,32 @@ Voici un exemple de fichier grid.csv :
 ![grid.csv](resourcesREADME/fichierGrid.png)
 #### Sans huitième argument
 Si le dernier argument n'est pas fourni, l'application génère une grille de manière aléatoire.
+````java
+private void addRandomTiles() {
+        for (int x = 0; x < this.height; x++) {
+            for (int y = 0; y < this.width; y++) {
+                if (x == 0 || y == 0 || x == this.height - 1 || y == this.width - 1) {
+                    this.tiles[x][y] = new Obstacle(new Vector2i(x, y), Colors.BLACK);
+                } else if (x == 1) {
+                    this.tiles[x][y] = new Tile(new Vector2i(x, y), Colors.BLACK);
+                } else if (x < this.height / 2) {
+                    this.tiles[x][y] = getRandomMiddleTile(x, y, 0.1);
+                } else {
+                    Tile tile = getRandomMiddleTile(x, y, 0.3);
+                    if (x > 2 && this.tiles[x - 1][y] instanceof Obstacle) {
+                        this.tiles[x][y] = new Obstacle(new Vector2i(x, y), Colors.BLACK);
+                    } else {
+                        if (this.tiles[x][y] == null) {
+                            this.tiles[x][y] = tile;
+                        }
+                    }
+                }
+            }
+        }
+        addFlag();
+        addCreature();
+    }
+````
 
 ### Généricité
 Afin d'utiliser l'algorithme génétique pour d'autres applications (exemple : somme de nombre), 2 types génériques
@@ -109,6 +135,28 @@ public interface ChromosomeBuilder<G> {
 ```java
 ChromosomeBuilder<Character> chromosomeBuilder = () -> Math.random() < 0.5 ? '0' : '1';
 ```
+### Parallélisation
+Dans la classe `WheelSelector`, un pool de threads a été créé afin de calculer les scores de tous les chromosomes :
+````java
+public void computeAllFitness(Population<G> population) {
+        final ExecutorService service = Executors.newFixedThreadPool(this.nThreads);
+        for (Chromosome<G> c : population.getChromosomes()) {
+            Future<Double> score = service.submit(()->fitness.getFitnessScore(c,solution));
+            scores.add(score);
+        }
+    }
+````
+Cela permet par la suite de pouvoir calculer la **somme** de toutes les fitness pour la sélection de la roulette.
+### Nombre de gènes
+L'algorithme suporte également des chromosomes possédant un nombre de gènes différent. Lors de la création de l'algorithme, il suffit de lui préciser un nombre de gènes minimum et un nombre de gènes maximum (si les 2 arguments
+sont spécifiés, le nombre de gènes pour chaque chromosome sera un nombre aléatoire choisi entre ces 2 bornes). Exemple : 
+````java
+algorithm
+        .maxGeneSize(15)
+        .minGeneSize(10)
+        ...
+        .buildGeneticAlgorithm();
+````
 ### Platformer
 #### Dépendances
 Deux dépendances ont été utilisées : 
